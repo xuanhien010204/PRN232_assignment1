@@ -11,9 +11,17 @@ builder.Services.AddRazorPages();
 // Add Controllers for API
 builder.Services.AddControllers();
 
-// Add DbContext with PostgreSQL
+// Add DbContext with PostgreSQL (with retry for cloud deployments)
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+        npgsqlOptions =>
+        {
+            npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorCodesToAdd: null);
+            npgsqlOptions.CommandTimeout(60);
+        }));
 
 // Configure Cloudinary
 builder.Services.Configure<CloudinarySettings>(
