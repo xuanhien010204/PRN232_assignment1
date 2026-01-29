@@ -1,0 +1,113 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <h1 class="display-4 fw-bold mb-3">
+        <i class="bi bi-bag-check"></i> Welcome to Product Store
+    </h1>
+    <p class="lead mb-4">
+        A modern CRUD application built with ASP.NET Core, Entity Framework Core, PostgreSQL & Cloudinary
+    </p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a asp-page="/Products/Index" class="btn btn-light btn-lg px-4 py-2">
+            <i class="bi bi-grid-3x3-gap"></i> Browse Products
+        </a>
+        <a asp-page="/Products/Create" class="btn btn-outline-light btn-lg px-4 py-2">
+            <i class="bi bi-plus-lg"></i> Add Product
+        </a>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="feature-card shadow-sm">
+            <div class="feature-icon text-primary">
+                <i class="bi bi-box-seam"></i>
+            </div>
+            <h5 class="fw-bold">Product Management</h5>
+            <p class="text-muted">Browse products with pagination - 4 products per page for better user experience.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card shadow-sm">
+            <div class="feature-icon text-success">
+                <i class="bi bi-cloud-upload"></i>
+            </div>
+            <h5 class="fw-bold">Cloudinary Upload</h5>
+            <p class="text-muted">Fast and reliable image hosting powered by Cloudinary CDN.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card shadow-sm">
+            <div class="feature-icon text-info">
+                <i class="bi bi-code-slash"></i>
+            </div>
+            <h5 class="fw-bold">REST API</h5>
+            <p class="text-muted">Full RESTful API with pagination support for developers.</p>
+        </div>
+    </div>
+</div>
+
+<!-- API Documentation -->
+<div class="card shadow-sm mb-5">
+    <div class="card-header" style="background: var(--primary-gradient); color: white;">
+        <h5 class="mb-0"><i class="bi bi-braces"></i> API Endpoints</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Method</th>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge bg-success">GET</span></td>
+                        <td><code>/api/products?pageNumber=1&pageSize=4</code></td>
+                        <td>Get paginated products (4 per page)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-success">GET</span></td>
+                        <td><code>/api/products/{id}</code></td>
+                        <td>Get product by ID</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-primary">POST</span></td>
+                        <td><code>/api/products</code></td>
+                        <td>Create new product</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-warning text-dark">PUT</span></td>
+                        <td><code>/api/products/{id}</code></td>
+                        <td>Update product</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge bg-danger">DELETE</span></td>
+                        <td><code>/api/products/{id}</code></td>
+                        <td>Delete product</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Tech Stack -->
+<div class="text-center mb-4">
+    <h5 class="text-muted mb-3">Built With</h5>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <span class="badge badge-custom"><i class="bi bi-filetype-cs"></i> ASP.NET Core 10</span>
+        <span class="badge badge-custom"><i class="bi bi-database"></i> PostgreSQL</span>
+        <span class="badge badge-custom"><i class="bi bi-layers"></i> EF Core</span>
+        <span class="badge badge-custom"><i class="bi bi-cloud"></i> Cloudinary</span>
+        <span class="badge badge-custom"><i class="bi bi-bootstrap"></i> Bootstrap 5</span>
+    </div>
+</div>

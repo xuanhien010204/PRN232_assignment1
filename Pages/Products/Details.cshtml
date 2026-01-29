@@ -1,0 +1,122 @@
+@page "{id:int}"
+@model Assignment1.Pages.Products.DetailsModel
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Product Details";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-page="/Index" class="text-decoration-none"><i class="bi bi-house"></i> Home</a></li>
+        <li class="breadcrumb-item"><a asp-page="Index" class="text-decoration-none">Products</a></li>
+        <li class="breadcrumb-item active">Details</li>
+    </ol>
+</nav>
+
+@if (Model.Product == null)
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-exclamation-circle display-1 text-warning"></i>
+            <h4 class="mt-3">Product Not Found</h4>
+            <p class="text-muted">The product you're looking for doesn't exist.</p>
+            <a asp-page="Index" class="btn btn-primary">
+                <i class="bi bi-arrow-left"></i> Back to Products
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <!-- Product Image -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 overflow-hidden">
+                @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                {
+                    <img src="@Model.Product.ImageUrl" class="card-img-top" alt="@Model.Product.Name"
+                         style="height: 400px; object-fit: cover;">
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-center text-white"
+                         style="height: 400px; background: var(--primary-gradient);">
+                        <i class="bi bi-image display-1"></i>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-secondary">ID: @Model.Product.Id</span>
+                        <div class="price-tag fs-4">$@Model.Product.Price.ToString("N2")</div>
+                    </div>
+
+                    <h2 class="fw-bold mb-4">@Model.Product.Name</h2>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-semibold mb-2">
+                            <i class="bi bi-card-text text-primary"></i> Description
+                        </h6>
+                        <p class="lead">@Model.Product.Description</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-muted fw-semibold mb-2">
+                                <i class="bi bi-link-45deg text-info"></i> Image URL
+                            </h6>
+                            <code class="small text-break">@Model.Product.ImageUrl</code>
+                        </div>
+                    }
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <a asp-page="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                        <div class="d-flex gap-2">
+                            <a asp-page="Edit" asp-route-id="@Model.Product.Id" class="btn btn-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirm Delete</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-trash display-4 text-danger"></i>
+                    <p class="mt-3 mb-0">Delete <strong>@Model.Product.Name</strong>?</p>
+                    <small class="text-muted">This action cannot be undone.</small>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form asp-page-handler="Delete" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,133 @@
+@page
+@model Assignment1.Pages.Products.IndexModel
+@{
+    ViewData["Title"] = "Products";
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1"><i class="bi bi-grid-3x3-gap text-primary"></i> All Products</h2>
+        <p class="text-muted mb-0">Browse and manage your product catalog</p>
+    </div>
+    <a asp-page="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Add Product
+    </a>
+</div>
+
+@if (Model.Products == null || !Model.Products.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <h4 class="mt-3">No Products Yet</h4>
+            <p class="text-muted">Start by creating your first product</p>
+            <a asp-page="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Create Product
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-4 g-4">
+        @foreach (var product in Model.Products)
+        {
+            <div class="col">
+                <div class="card product-card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                    {
+                        <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name">
+                    }
+                    else
+                    {
+                        <div class="placeholder-img">
+                            <i class="bi bi-image"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@product.Name</h5>
+                        <p class="card-text text-muted small">
+                            @(product.Description.Length > 80 
+                                ? product.Description.Substring(0, 80) + "..." 
+                                : product.Description)
+                        </p>
+                        <div class="price-tag d-inline-block">
+                            $@product.Price.ToString("N2")
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 pb-3">
+                        <div class="d-flex gap-2">
+                            <a asp-page="Details" asp-route-id="@product.Id" class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a asp-page="Edit" asp-route-id="@product.Id" class="btn btn-outline-warning btn-sm flex-fill">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal-@product.Id">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Modal -->
+            <div class="modal fade" id="deleteModal-@product.Id" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirm Delete</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="bi bi-trash display-4 text-danger"></i>
+                            <p class="mt-3 mb-0">Are you sure you want to delete <strong>@product.Name</strong>?</p>
+                            <small class="text-muted">This action cannot be undone.</small>
+                        </div>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form asp-page-handler="Delete" asp-route-id="@product.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">
+                        <i class="bi bi-chevron-left"></i> Prev
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-page="Index" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    </li>
+                }
+
+                <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <p class="text-center text-muted">
+            Page @Model.PageNumber of @Model.TotalPages | Total: @Model.TotalItems products
+        </p>
+    }
+}
