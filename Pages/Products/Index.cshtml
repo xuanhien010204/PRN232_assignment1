@@ -15,21 +15,142 @@
     </a>
 </div>
 
+<!-- 🔍 SEARCH & FILTER SECTION -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <!-- Search Box -->
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-search text-primary"></i> Search
+                </label>
+                <input type="text" name="search" value="@Model.Search" 
+                       class="form-control" placeholder="Search by name or description...">
+            </div>
+
+            <!-- Min Price -->
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-currency-dollar text-success"></i> Min Price
+                </label>
+                <input type="number" name="minPrice" value="@Model.MinPrice" 
+                       class="form-control" placeholder="0" step="0.01" min="0">
+            </div>
+
+            <!-- Max Price -->
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-currency-dollar text-danger"></i> Max Price
+                </label>
+                <input type="number" name="maxPrice" value="@Model.MaxPrice" 
+                       class="form-control" placeholder="9999" step="0.01" min="0">
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-sort-down text-info"></i> Sort By
+                </label>
+                <select name="sortBy" class="form-select">
+                    <option value="">-- Default --</option>
+                    <option value="name" selected="@(Model.SortBy == "name")">Name</option>
+                    <option value="price" selected="@(Model.SortBy == "price")">Price</option>
+                    <option value="newest" selected="@(Model.SortBy == "newest")">Newest</option>
+                    <option value="oldest" selected="@(Model.SortBy == "oldest")">Oldest</option>
+                </select>
+            </div>
+
+            <!-- Sort Order -->
+            <div class="col-md-2">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-arrow-down-up text-warning"></i> Order
+                </label>
+                <select name="sortOrder" class="form-select">
+                    <option value="asc" selected="@(Model.SortOrder == "asc")">Ascending ↑</option>
+                    <option value="desc" selected="@(Model.SortOrder == "desc")">Descending ↓</option>
+                </select>
+            </div>
+
+            <!-- Hidden: Keep page size -->
+            <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+            <!-- Buttons -->
+            <div class="col-12">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Apply Filters
+                    </button>
+                    <a asp-page="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Active Filters Display -->
+@if (!string.IsNullOrEmpty(Model.Search) || Model.MinPrice.HasValue || Model.MaxPrice.HasValue || !string.IsNullOrEmpty(Model.SortBy))
+{
+    <div class="mb-3">
+        <span class="text-muted">Active filters:</span>
+        @if (!string.IsNullOrEmpty(Model.Search))
+        {
+            <span class="badge bg-primary me-1">
+                <i class="bi bi-search"></i> "@Model.Search"
+            </span>
+        }
+        @if (Model.MinPrice.HasValue)
+        {
+            <span class="badge bg-success me-1">
+                <i class="bi bi-currency-dollar"></i> Min: $@Model.MinPrice.Value.ToString("N2")
+            </span>
+        }
+        @if (Model.MaxPrice.HasValue)
+        {
+            <span class="badge bg-danger me-1">
+                <i class="bi bi-currency-dollar"></i> Max: $@Model.MaxPrice.Value.ToString("N2")
+            </span>
+        }
+        @if (!string.IsNullOrEmpty(Model.SortBy))
+        {
+            <span class="badge bg-info me-1">
+                <i class="bi bi-sort-down"></i> Sort: @Model.SortBy (@Model.SortOrder)
+            </span>
+        }
+    </div>
+}
+
 @if (Model.Products == null || !Model.Products.Any())
 {
     <div class="card shadow-sm">
         <div class="card-body text-center py-5">
             <i class="bi bi-inbox display-1 text-muted"></i>
-            <h4 class="mt-3">No Products Yet</h4>
-            <p class="text-muted">Start by creating your first product</p>
-            <a asp-page="Create" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Create Product
-            </a>
+            <h4 class="mt-3">No Products Found</h4>
+            @if (!string.IsNullOrEmpty(Model.Search) || Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+            {
+                <p class="text-muted">Try adjusting your search or filter criteria</p>
+                <a asp-page="Index" class="btn btn-outline-primary">
+                    <i class="bi bi-x-circle"></i> Clear Filters
+                </a>
+            }
+            else
+            {
+                <p class="text-muted">Start by creating your first product</p>
+                <a asp-page="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Create Product
+                </a>
+            }
         </div>
     </div>
 }
 else
 {
+    <!-- Results Count -->
+    <p class="text-muted mb-3">
+        <i class="bi bi-box"></i> Found <strong>@Model.TotalItems</strong> product(s)
+    </p>
+
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 row-cols-xl-4 g-4">
         @foreach (var product in Model.Products)
         {
@@ -100,13 +221,20 @@ else
         }
     </div>
 
-    <!-- Pagination -->
+    <!-- Pagination with Search/Filter Parameters -->
     @if (Model.TotalPages > 1)
     {
         <nav class="mt-5">
             <ul class="pagination justify-content-center">
                 <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
-                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" asp-route-pageSize="@Model.PageSize">
+                    <a class="page-link" asp-page="Index" 
+                       asp-route-pageNumber="@(Model.PageNumber - 1)" 
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-search="@Model.Search"
+                       asp-route-minPrice="@Model.MinPrice"
+                       asp-route-maxPrice="@Model.MaxPrice"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortOrder="@Model.SortOrder">
                         <i class="bi bi-chevron-left"></i> Prev
                     </a>
                 </li>
@@ -114,12 +242,26 @@ else
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                        <a class="page-link" asp-page="Index" asp-route-pageNumber="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                        <a class="page-link" asp-page="Index" 
+                           asp-route-pageNumber="@i" 
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-search="@Model.Search"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-sortOrder="@Model.SortOrder">@i</a>
                     </li>
                 }
 
                 <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
-                    <a class="page-link" asp-page="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" asp-route-pageSize="@Model.PageSize">
+                    <a class="page-link" asp-page="Index" 
+                       asp-route-pageNumber="@(Model.PageNumber + 1)" 
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-search="@Model.Search"
+                       asp-route-minPrice="@Model.MinPrice"
+                       asp-route-maxPrice="@Model.MaxPrice"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortOrder="@Model.SortOrder">
                         Next <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>

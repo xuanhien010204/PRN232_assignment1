@@ -20,21 +20,64 @@ public class ProductsController : ControllerBase
         _cloudinaryService = cloudinaryService;
     }
 
-    // GET: api/products?pageNumber=1&pageSize=4
+    // GET: api/products?pageNumber=1&pageSize=4&search=laptop&minPrice=100&maxPrice=1000&sortBy=price&sortOrder=asc
     [HttpGet]
     public async Task<ActionResult<PaginatedResponse<ProductDto>>> GetProducts(
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 4) 
+        [FromQuery] int pageSize = 4,
+        [FromQuery] string? search = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortOrder = "asc") 
     {
         // Validate pagination parameters
         if (pageNumber < 1) pageNumber = 1;
         if (pageSize < 1) pageSize = 4;
         if (pageSize > 50) pageSize = 50;
-        var totalItems = await _context.Products.CountAsync();
+
+        // Start with base query
+        var query = _context.Products.AsQueryable();
+
+        // 🔍 SEARCH: Filter by name or description
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            query = query.Where(p => 
+                p.Name.ToLower().Contains(searchLower) || 
+                p.Description.ToLower().Contains(searchLower));
+        }
+
+        // 💰 FILTER: Filter by price range
+        if (minPrice.HasValue)
+        {
+            query = query.Where(p => p.Price >= minPrice.Value);
+        }
+        if (maxPrice.HasValue)
+        {
+            query = query.Where(p => p.Price <= maxPrice.Value);
+        }
+
+        // 📊 SORT: Apply sorting
+        query = sortBy?.ToLower() switch
+        {
+            "name" => sortOrder?.ToLower() == "desc" 
+                ? query.OrderByDescending(p => p.Name) 
+                : query.OrderBy(p => p.Name),
+            "price" => sortOrder?.ToLower() == "desc" 
+                ? query.OrderByDescending(p => p.Price) 
+                : query.OrderBy(p => p.Price),
+            "newest" => query.OrderByDescending(p => p.Id),
+            "oldest" => query.OrderBy(p => p.Id),
+            _ => query.OrderByDescending(p => p.Id) // Default: newest first
+        };
+
+        // Get total count after filtering
+        var totalItems = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-        var products = await _context.Products
-            .OrderByDescending(p => p.Id)
+        // Apply pagination
+        var products = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new ProductDto
